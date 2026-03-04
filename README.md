@@ -1,41 +1,47 @@
 # 🚀 Clara AI Agent Configuration Pipeline
 
-This repository contains an automated pipeline that converts **call transcripts into structured AI agent configurations**.
+> Automated pipeline that converts call transcripts into structured AI agent configurations with **versioned outputs and change tracking**.
 
-The system generates an initial **Agent Configuration (v1)** from demo transcripts and updates the configuration to **v2** using onboarding transcripts while producing a **changelog of updates**.
+---
 
-The workflows are implemented using **n8n** with **AI-powered information extraction**.
+# 🧭 System Architecture
+
+The pipeline processes demo and onboarding call transcripts to generate and update AI agent configurations.
+
+![Demo Workflow](workflows/demo_to_agent_v1.png)
+
+![Onboarding Workflow](workflows/onboarding_to_agent_v2.png)
 
 ---
 
 # 🧠 System Overview
 
-The pipeline behaves like a small internal product that:
+This project implements a small **configuration management pipeline for AI agents**.
 
-- Converts **unstructured transcripts → structured agent configuration**
+The system:
+
+- Converts **unstructured call transcripts → structured agent configuration**
 - Maintains **versioned outputs (v1 → v2)**
-- Tracks configuration updates automatically
-- Requires minimal manual intervention
-- Produces reproducible outputs
+- Automatically **detects and records changes**
+- Generates structured **JSON configuration files**
+- Requires **minimal manual intervention**
 
-Two automated workflows are implemented.
+Two workflows are implemented.
 
 ---
 
 # 🧩 Workflow 1 — Demo → Agent Configuration v1
 
-This workflow generates the **initial agent configuration** from demo call transcripts.
-
-![Demo Workflow](workflows/demo_to_agent_v1.png)
+This workflow generates the **initial AI agent configuration** from demo transcripts.
 
 ### Steps
 
 1. Download demo transcript
-2. Extract text from transcript file
+2. Extract text from transcript
 3. Extract business information using AI
 4. Generate **Account Memo**
 5. Generate **Agent Specification**
-6. Save outputs to version **v1**
+6. Store outputs as **Version v1**
 
 ### Output Location
 
@@ -44,7 +50,7 @@ outputs/accounts/account_001/v1/
 ### Files Generated
 
 account_memo.json  
-agent_spec.json
+agent_spec.json  
 
 ---
 
@@ -52,18 +58,16 @@ agent_spec.json
 
 This workflow updates the existing configuration using onboarding transcripts.
 
-![Onboarding Workflow](workflows/onboarding_to_agent_v2.png)
-
 ### Steps
 
 1. Download onboarding transcript
-2. Extract updated business information using AI
-3. Load existing **Account Memo (v1)**
-4. Merge new information with existing configuration
-5. Generate updated **Account Memo**
-6. Generate updated **Agent Specification**
-7. Generate **Changelog**
-8. Save outputs as version **v2**
+2. Extract updated business information
+3. Load existing **account memo**
+4. Merge updates with existing configuration
+5. Generate updated **account memo**
+6. Generate updated **agent specification**
+7. Generate **changelog**
+8. Store outputs as **Version v2**
 
 ### Output Location
 
@@ -73,7 +77,7 @@ outputs/accounts/account_001/v2/
 
 account_memo.json  
 agent_spec.json  
-changelog.json
+changelog.json  
 
 ---
 
@@ -90,7 +94,7 @@ account_memo.json
 agent_spec.json  
 changelog.json  
 
-The changelog records differences between versions such as:
+The **changelog** records configuration updates such as:
 
 - New services added
 - Updated business hours
@@ -139,10 +143,10 @@ README.md
 
 # ⚙️ Technologies Used
 
-- **n8n** — workflow automation
-- **LLM-based information extraction**
-- **JSON structured outputs**
-- **Google Drive integration for file storage**
+- **n8n** – workflow automation
+- **LLM-powered information extraction**
+- **JSON schemas for structured outputs**
+- **Google Drive integration**
 
 ---
 
@@ -150,14 +154,14 @@ README.md
 
 This pipeline was designed to:
 
-- Convert **unstructured transcripts into structured agent configurations**
-- Maintain **version controlled outputs**
-- Automatically **track configuration changes**
-- Provide **repeatable workflows**
-- Require **minimal manual intervention**
+- Transform **unstructured transcripts → structured agent configurations**
+- Maintain **version-controlled agent definitions**
+- Automatically track configuration changes
+- Support **repeatable onboarding workflows**
+- Scale easily to multiple accounts
 
 ---
 
 # 💡 Result
 
-The system functions as a **configuration management pipeline for AI agents**, automatically converting operational call transcripts into **structured and versioned AI agent behavior definitions**.
+The system acts as a **configuration management pipeline for AI agents**, automatically converting operational call transcripts into **structured and versioned AI agent behavior definitions**.
