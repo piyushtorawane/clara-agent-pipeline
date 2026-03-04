@@ -1,0 +1,467 @@
+{
+  "name": "Call Transcript to AI Agent Configuration Generator",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "0146dac6-8408-4959-b8e6-fe8718bc4ea6",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        256,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1j3oMt0SjDu_a8s_Sc9X1lo4e5K6NlfG0",
+          "mode": "list",
+          "cachedResultName": "demo1.txt",
+          "cachedResultUrl": "https://drive.google.com/file/d/1j3oMt0SjDu_a8s_Sc9X1lo4e5K6NlfG0/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "id": "70f21044-bfb1-4606-8545-05758195a1fe",
+      "name": "Download Transcript",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        480,
+        400
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "232a2aa5-1e78-4e9c-bffe-43c10881c2ec",
+      "name": "Extract Text from File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a business information extraction assistant. Analyze the provided call transcript and extract key business information including: company name, services supported, emergency definitions, and business hours. Be thorough and accurate."
+        }
+      },
+      "id": "ddb16bf0-96c5-4012-8f3b-b2332b3382f9",
+      "name": "Extract Business Info",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        928,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "c66ee482-0b23-43ae-b918-4ed82198549a",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        624
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "WAKYfj4TDV8HfWvp",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"company_name\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"services_supported\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t},\n\t\t\"emergency_definition\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t}\n\t\t},\n\t\t\"business_hours\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t}\n}"
+      },
+      "id": "022bd323-f706-4cc2-8e30-d0d6b67e10cc",
+      "name": "Business Info Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "account_id",
+              "value": "account_001",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "company_name",
+              "value": "={{ $json.output.company_name || 'Unknown Company' }}",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "business_hours",
+              "value": "={{ \n  typeof $json.output.business_hours === \"string\"\n    ? { days: \"Monday to Friday\", start: \"08:00\", end: \"17:00\", timezone: \"unknown\" }\n    : ($json.output.business_hours || {})\n}}",
+              "type": "object"
+            },
+            {
+              "id": "id-4",
+              "name": "office_address",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "id-5",
+              "name": "services_supported",
+              "value": "={{ $json.output.emergency_definition || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "id-6",
+              "name": "emergency_definition",
+              "value": "={{ $json.output.emergency_definition || [] }}",
+              "type": "array"
+            },
+            {
+              "id": "id-7",
+              "name": "emergency_routing_rules",
+              "value": "{}",
+              "type": "object"
+            },
+            {
+              "id": "id-8",
+              "name": "non_emergency_routing_rules",
+              "value": "{}",
+              "type": "object"
+            },
+            {
+              "id": "id-9",
+              "name": "call_transfer_rules",
+              "value": "{}",
+              "type": "object"
+            },
+            {
+              "id": "id-10",
+              "name": "integration_constraints",
+              "value": "[]",
+              "type": "array"
+            },
+            {
+              "id": "id-11",
+              "name": "after_hours_flow_summary",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "id-12",
+              "name": "office_hours_flow_summary",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "id-13",
+              "name": "questions_or_unknowns",
+              "value": "[]",
+              "type": "array"
+            },
+            {
+              "id": "id-14",
+              "name": "notes",
+              "value": "Generated from demo transcript via AI extraction",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7540475d-7e69-4431-945c-44b1e67a19d1",
+      "name": "Build Account Memo",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "id-1",
+              "name": "agent_name",
+              "value": "Clara AI Agent",
+              "type": "string"
+            },
+            {
+              "id": "id-2",
+              "name": "version",
+              "value": "v1",
+              "type": "string"
+            },
+            {
+              "id": "id-3",
+              "name": "system_prompt",
+              "value": "You are Clara, an AI phone agent for handling customer calls. Follow these conversation flows based on business hours:\n\n**BUSINESS HOURS FLOW:**\n1. Greeting - Welcome the caller warmly and introduce yourself\n2. Ask Purpose - Inquire about the reason for their call\n3. Collect Information - Gather caller's name and phone number\n4. Transfer Call - Attempt to transfer the call to the appropriate department or person\n5. Fallback - If transfer fails, inform the caller and offer to take a message or provide alternative contact methods\n6. Ask if Anything Else - Check if the caller needs additional assistance\n7. Close Call - Thank the caller and end the conversation professionally\n\n**AFTER HOURS FLOW:**\n1. Greeting - Welcome the caller and inform them they've reached after-hours service\n2. Ask Purpose - Inquire about the reason for their call\n3. Confirm Emergency - Determine if this is an emergency situation\n4. If Emergency:\n   - Collect caller's name, phone number, and address\n   - Attempt to transfer to emergency on-call personnel\n   - Fallback - If transfer fails, assure caller help is being dispatched and provide emergency contact information\n5. If Non-Emergency:\n   - Log the request with caller's name and phone number\n   - Inform caller of business hours and when they can expect a callback\n6. Close Call - Thank the caller and end the conversation professionally\n\nAlways maintain a professional, empathetic tone and ensure all required information is collected accurately.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "647d3d2b-5e3b-4cd8-a6c7-5b7a62dbce9f",
+      "name": "Build Agent Spec",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "name": "account_memo.json",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1afS9GZI6SmzOIo6k_Qzuwqz1L4smVmJa",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "250c08e6-e751-405d-be43-020f5fe5b5e3",
+      "name": "Upload Account Memo",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        304
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "agent_spec.json",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1afS9GZI6SmzOIo6k_Qzuwqz1L4smVmJa",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "29dd0c88-1daf-4dd7-9ae2-0290a60815ee",
+      "name": "Upload Agent Spec",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        496
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = JSON.stringify($json, null, 2);\n\nreturn [\n  {\n    json: {},\n    binary: {\n      data: {\n        data: Buffer.from(text).toString('base64'),\n        mimeType: 'application/json',\n        fileName: 'account_memo.json'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        304
+      ],
+      "id": "bf6e1c69-7b0d-4a7a-a79b-8ef87739bf9c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = JSON.stringify($json, null, 2);\n\nreturn [\n  {\n    json: {},\n    binary: {\n      data: {\n        data: Buffer.from(text).toString('base64'),\n        mimeType: 'application/json',\n        fileName: 'agent_spec.json'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        496
+      ],
+      "id": "45142f77-05b5-41e2-85c0-9d052fdc1f07",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Business Info": {
+      "main": [
+        [
+          {
+            "node": "Build Account Memo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Agent Spec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Transcript": {
+      "main": [
+        [
+          {
+            "node": "Extract Text from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text from File": {
+      "main": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Info Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Account Memo": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Agent Spec": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload Account Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Upload Agent Spec",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0904ce68-cc87-4746-8cf5-aa33560f0c2b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6a25b5c580fda1395ed37e089a5717ea26793a54be0e386a5180a18b5fd6ef4b"
+  },
+  "id": "dPmvJ3WrIIUb5cJr",
+  "tags": []
+}

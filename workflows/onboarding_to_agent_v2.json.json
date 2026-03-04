@@ -1,0 +1,584 @@
+{
+  "name": "Onboarding Transcript to AI Agent Configuration v2",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "079382a0-f134-4107-a536-55bac634bb32",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        256,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1WFxTVQTFU21jKUSvwzAX7X62kGLhcwL8",
+          "mode": "list",
+          "cachedResultName": "onboarding1.txt",
+          "cachedResultUrl": "https://drive.google.com/file/d/1WFxTVQTFU21jKUSvwzAX7X62kGLhcwL8/view?usp=drivesdk"
+        },
+        "options": {
+          "googleFileConversion": {}
+        }
+      },
+      "id": "38a2b3ff-382e-45b5-b710-1d7149ae838e",
+      "name": "Download Onboarding Transcript",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        480,
+        512
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "id": "aa6ef305-e187-4eaf-bc18-ca16f9566e90",
+      "name": "Extract Text From File",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        704,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1AZhP4YLDGhiCXvnLAgyjcv7Yxt9eweSw",
+          "mode": "list",
+          "cachedResultName": "account_memo.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1AZhP4YLDGhiCXvnLAgyjcv7Yxt9eweSw/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "id": "f27d8496-89ae-42e8-ad7a-1f970704b19e",
+      "name": "Download Existing Account Memo",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        992,
+        816
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.data }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a business information extraction specialist. Analyze the onboarding call transcript and extract structured information about the company, services, emergency definitions, business hours, routing rules, and integration constraints. Be thorough and accurate."
+        }
+      },
+      "id": "1ec37002-1978-4489-8e81-4b6605895358",
+      "name": "Extract Business Info",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        928,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "316ea685-5d5a-4101-a6f9-2f94aece5928",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        640
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "WAKYfj4TDV8HfWvp",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"company_name\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"The name of the company\"\n\t\t},\n\t\t\"services_supported\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"description\": \"List of services supported by the business\"\n\t\t},\n\t\t\"emergency_definition\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Definition of what constitutes an emergency\"\n\t\t},\n\t\t\"business_hours\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"Business operating hours\"\n\t\t},\n\t\t\"routing_rules\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\"\n\t\t\t},\n\t\t\t\"description\": \"Rules for routing calls or requests\"\n\t\t},\n\t\t\"integration_constraints\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"description\": \"Constraints related to system integrations\"\n\t\t}\n\t}\n}"
+      },
+      "id": "2acd6014-21e5-4083-b29c-a881bfe3f701",
+      "name": "Business Info Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1072,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "a8302726-355c-4347-b693-e159673ee612",
+      "name": "Merge Account Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1280,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the extracted business info from the AI agent\nconst extractedInfo = $input.first().json.output;\n\n// Get the existing account memo (v1)\nconst existingMemo = $input.last().json;\n\n// Helper function to merge objects, preferring new values if they exist\nfunction mergeField(newValue, oldValue) {\n  if (newValue !== undefined && newValue !== null && newValue !== '') {\n    return newValue;\n  }\n  return oldValue;\n}\n\n// Build the updated account memo (v2)\nconst updatedMemo = {\n  version: 'v2',\n  updated_at: new Date().toISOString(),\n  company_name: mergeField(extractedInfo.company_name, existingMemo.company_name),\n  services_supported: extractedInfo.services_supported && extractedInfo.services_supported.length > 0 \n    ? extractedInfo.services_supported \n    : existingMemo.services_supported || [],\n  emergency_definition: mergeField(extractedInfo.emergency_definition, existingMemo.emergency_definition),\n  business_hours: extractedInfo.business_hours && Object.keys(extractedInfo.business_hours).length > 0\n    ? extractedInfo.business_hours\n    : existingMemo.business_hours || {},\n  routing_rules: extractedInfo.routing_rules && extractedInfo.routing_rules.length > 0\n    ? extractedInfo.routing_rules\n    : existingMemo.routing_rules || [],\n  integration_constraints: extractedInfo.integration_constraints && extractedInfo.integration_constraints.length > 0\n    ? extractedInfo.integration_constraints\n    : existingMemo.integration_constraints || [],\n  // Preserve any additional fields from the existing memo\n  ...Object.keys(existingMemo)\n    .filter(key => !['version', 'updated_at', 'company_name', 'services_supported', 'emergency_definition', 'business_hours', 'routing_rules', 'integration_constraints'].includes(key))\n    .reduce((acc, key) => ({ ...acc, [key]: existingMemo[key] }), {})\n};\n\nreturn [{ json: updatedMemo }];"
+      },
+      "id": "dff7c309-b9ba-41b1-89ac-d1e27b9e8805",
+      "name": "Merge and Build Updated Account Memo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI agent configuration specialist. Generate a complete agent_spec JSON based on the provided account memo. Include agent_name, version (v2), system_prompt, key variables, and routing rules. Make the system prompt comprehensive and actionable."
+        }
+      },
+      "id": "88cac818-f655-4db6-b879-4f10d5c75ef8",
+      "name": "Build Agent Spec",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1728,
+        912
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "3424c95e-0151-4839-ac32-8b9a2cbc43d2",
+      "name": "OpenAI Chat Model 2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        1136
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "WAKYfj4TDV8HfWvp",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"agent_name\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"The name of the AI agent\"\n\t\t},\n\t\t\"version\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Version of the agent specification\"\n\t\t},\n\t\t\"system_prompt\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"The system prompt for the AI agent\"\n\t\t},\n\t\t\"key_variables\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"description\": \"Key variables used by the agent\"\n\t\t},\n\t\t\"routing_rules\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"object\"\n\t\t\t},\n\t\t\t\"description\": \"Rules for routing calls or requests\"\n\t\t}\n\t}\n}"
+      },
+      "id": "2d5dcbfc-2519-44fb-95d4-e5f2a1aa53f3",
+      "name": "Agent Spec Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a changelog generator. Compare the v1 and v2 account memos and create a detailed changelog describing what changed between versions. Be specific about updates to business hours, services, routing rules, and other fields."
+        }
+      },
+      "id": "d3b2166b-c276-431a-bbe8-a9581dc1a4f6",
+      "name": "Generate Changelog",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1728,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "id"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "93aa4fe2-f4c8-4623-92ee-f2995b621b14",
+      "name": "OpenAI Chat Model 3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        528
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "WAKYfj4TDV8HfWvp",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"version\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Version of the changelog\"\n\t\t},\n\t\t\"updated_at\": {\n\t\t\t\"type\": \"string\",\n\t\t\t\"description\": \"Timestamp when the changelog was created\"\n\t\t},\n\t\t\"changes\": {\n\t\t\t\"type\": \"array\",\n\t\t\t\"items\": {\n\t\t\t\t\"type\": \"string\"\n\t\t\t},\n\t\t\t\"description\": \"List of changes made\"\n\t\t}\n\t}\n}"
+      },
+      "id": "5986f70b-f871-4227-86a3-c9e79d0a4ee3",
+      "name": "Changelog Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1872,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items (account_memo, agent_spec, changelog)\nconst items = $input.all();\n\n// Define the expected filenames for each output\nconst filenames = ['account_memo.json', 'agent_spec.json', 'changelog.json'];\n\n// Convert each JSON item to binary data\nconst binaryItems = items.map((item, index) => {\n  const jsonData = item.json;\n  const jsonString = JSON.stringify(jsonData, null, 2);\n  const buffer = Buffer.from(jsonString, 'utf-8');\n  \n  return {\n    json: {\n      filename: filenames[index] || `output_${index}.json`\n    },\n    binary: {\n      data: {\n        data: buffer.toString('base64'),\n        mimeType: 'application/json',\n        fileName: filenames[index] || `output_${index}.json`,\n        fileExtension: 'json'\n      }\n    }\n  };\n});\n\nreturn binaryItems;"
+      },
+      "id": "62227f71-2553-49fd-a102-933d00754554",
+      "name": "Convert JSON to Binary Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "name": "={{$binary.data.fileName}}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1E5Gqk6wPlH8eVvqqZ3ul7rLSZymq8nQm",
+          "mode": "list",
+          "cachedResultName": "v2",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1E5Gqk6wPlH8eVvqqZ3ul7rLSZymq8nQm"
+        },
+        "options": {}
+      },
+      "id": "5b51229c-7f28-4204-bc68-59533b9105e8",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2752,
+        656
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "BCJbYSwZygzM4kmO",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = JSON.stringify($json, null, 2);\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: Buffer.from(text).toString('base64'),\n      mimeType: 'application/json',\n      fileName: 'agent_spec.json'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2128,
+        912
+      ],
+      "id": "7e7e8c77-7edf-4620-83ae-450da52a4b3e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "const jsonString = JSON.stringify($json, null, 2);\n\nreturn [{\n  json: {},\n  binary: {\n    data: {\n      data: Buffer.from(jsonString).toString('base64'),\n      mimeType: 'application/json',\n      fileName: 'changelog.json'\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        304
+      ],
+      "id": "b2ad576f-89b6-4bb5-904e-3e0d166ff5b3",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Download Existing Account Memo": {
+      "main": [
+        [
+          {
+            "node": "Merge Account Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download Onboarding Transcript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download Existing Account Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Onboarding Transcript": {
+      "main": [
+        [
+          {
+            "node": "Extract Text From File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text From File": {
+      "main": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Business Info Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Extract Business Info",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Business Info": {
+      "main": [
+        [
+          {
+            "node": "Merge Account Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Account Data": {
+      "main": [
+        [
+          {
+            "node": "Merge and Build Updated Account Memo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge and Build Updated Account Memo": {
+      "main": [
+        [
+          {
+            "node": "Build Agent Spec",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Changelog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert JSON to Binary Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model 2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Build Agent Spec",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Spec Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Build Agent Spec",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model 3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Changelog",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changelog Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Changelog",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Agent Spec": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Changelog": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert JSON to Binary Files": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "320e2f48-3966-486f-9dcf-0e9c0566b503",
+  "meta": {
+    "instanceId": "6a25b5c580fda1395ed37e089a5717ea26793a54be0e386a5180a18b5fd6ef4b"
+  },
+  "id": "uNso1xfaamRBmQ8V",
+  "tags": []
+}

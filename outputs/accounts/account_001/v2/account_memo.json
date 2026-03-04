@@ -1,0 +1,20 @@
+{
+  "version": "v2",
+  "updated_at": "2026-03-04T19:07:11.262Z",
+  "company_name": "ABC Fire Protection",
+  "services_supported": [
+    "fire alarm inspection"
+  ],
+  "emergency_definition": "Emergency sprinkler leaks should go directly to dispatch.",
+  "business_hours": {},
+  "routing_rules": [],
+  "integration_constraints": [],
+  "output": {
+    "company_name": "ABC Fire Protection",
+    "services_supported": [
+      "fire alarm inspection"
+    ],
+    "emergency_definition": "Emergency sprinkler leaks should go directly to dispatch.",
+    "integration_constraints": []
+  }
+}
